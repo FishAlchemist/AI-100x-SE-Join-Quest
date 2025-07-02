@@ -1,0 +1,15 @@
+[project]
+name = "ai-100x-se-join-quest"
+version = "0.1.0"
+description = "BDD development for E-commerce Order Pricing Promotions"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+dependencies = [
+    "behave",
+    "pytest",
+    "ruff",
+    "mypy",
+]
+requires-python = ">=3.11"
+
