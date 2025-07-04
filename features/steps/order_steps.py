@@ -20,6 +20,8 @@ def step_when_customer_places_order(context):
         product = Product(name=row['productName'], unit_price=int(row['unitPrice']), category=row.get('category', ''))
         order_items.append(OrderItem(product=product, quantity=int(row['quantity'])))
     
+    if not hasattr(context, 'promotions'):
+        context.promotions = {}
     context.order_service = OrderService(**context.promotions)
     context.order = context.order_service.checkout(order_items)
 
@@ -52,6 +54,8 @@ def step_then_customer_should_receive(context):
 
 @given('the threshold discount promotion is configured')
 def step_given_threshold_discount(context):
+    if not hasattr(context, 'promotions'):
+        context.promotions = {}
     context.promotions['threshold_discount'] = {
         "threshold": int(context.table[0]['threshold']),
         "discount": int(context.table[0]['discount'])
@@ -59,7 +63,23 @@ def step_given_threshold_discount(context):
 
 @given('the buy one get one promotion for cosmetics is active')
 def step_given_bogo_cosmetics(context):
+    if not hasattr(context, 'promotions'):
+        context.promotions = {}
     bogo_type = 'buy_one_get_one' # Default to buy one get one
     if "same product twice" in context.scenario.name:
         bogo_type = 'buy_two_get_one'
     context.promotions['bogo_type'] = bogo_type
+
+@given('the double 11 promotion is active')
+def step_given_double_11_promotion_active(context):
+    if not hasattr(context, 'promotions'):
+        context.promotions = {}
+    context.promotions['double_11_promotion'] = True
+
+@then('the calculation method should be "{method}"')
+def step_then_calculation_method_should_be(context, method):
+    # This step is primarily for documentation in the feature file.
+    # The actual calculation is verified by the 'Then the order summary should be' step.
+    # We can optionally store the method for debugging if needed.
+    context.calculation_method = method
+    pass

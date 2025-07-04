@@ -1,5 +1,5 @@
-
 from dataclasses import dataclass
+
 
 @dataclass
 class Product:
@@ -7,10 +7,12 @@ class Product:
     unit_price: int
     category: str = ""
 
+
 @dataclass
 class OrderItem:
     product: Product
     quantity: int
+
 
 @dataclass
 class Order:

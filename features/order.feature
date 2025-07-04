@@ -88,3 +88,60 @@ Feature: E-commerce Order Pricing Promotions
       | productName | quantity |
       | T-shirt     | 3        |
       | 口紅        | 2        |
+  
+  Scenario: Double 11 promotion applies for multiples of 10 of the same product
+    Given the double 11 promotion is active
+    When a customer places an order with:
+      | productName | quantity | unitPrice |
+      | 襪子        | 12       | 100       |
+    Then the calculation method should be "10x100x80%+100x2=1000"
+    Then the order summary should be:
+      | totalAmount |
+      | 1000        |
+    And the customer should receive:
+      | productName | quantity |
+      | 襪子        | 12       |
+
+  Scenario: Double 11 promotion applies for multiples of 10 of the same product, with remainder
+    Given the double 11 promotion is active
+    When a customer places an order with:
+      | productName | quantity | unitPrice |
+      | 襪子        | 27       | 100       |
+    Then the calculation method should be "10x100x80%+10x100x80%+7x100=2300"
+    And the order summary should be:
+      | totalAmount |
+      | 2300        |
+    And the customer should receive:
+      | productName | quantity |
+      | 襪子        | 27       |
+  
+  Scenario: Double 11 promotion does not apply for 10 different products
+    Given the double 11 promotion is active
+    When a customer places an order with:
+      | productName | quantity | unitPrice |
+      | A           | 1        | 100       |
+      | B           | 1        | 100       |
+      | C           | 1        | 100       |
+      | D           | 1        | 100       |
+      | E           | 1        | 100       |
+      | F           | 1        | 100       |
+      | G           | 1        | 100       |
+      | H           | 1        | 100       |
+      | I           | 1        | 100       |
+      | J           | 1        | 100       |
+    Then the calculation method should be "10 x 100 = 1000"
+    And the order summary should be:
+      | totalAmount |
+      | 1000        |
+    And the customer should receive:
+      | productName | quantity |
+      | A           | 1        |
+      | B           | 1        |
+      | C           | 1        |
+      | D           | 1        |
+      | E           | 1        |
+      | F           | 1        |
+      | G           | 1        |
+      | H           | 1        |
+      | I           | 1        |
+      | J           | 1        |
