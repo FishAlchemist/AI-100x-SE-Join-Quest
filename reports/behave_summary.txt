@@ -1,0 +1,151 @@
+@order_pricing
+Feature: E-commerce Order Pricing Promotions # features/order.feature:2
+  As a shopper
+  I want the system to calculate my order total with applicable promotions
+  So that I can understand how much to pay and what items I will receive
+  Scenario: Single product without promotions  # features/order.feature:7
+    Given no promotions are applied            # features/steps/order_steps.py:11
+    When a customer places an order with       # features/steps/order_steps.py:16
+      | productName | quantity | unitPrice |
+      | T-shirt     | 1        | 500       |
+    Then the order summary should be           # features/steps/order_steps.py:28
+      | totalAmount |
+      | 500         |
+    And the customer should receive            # features/steps/order_steps.py:41
+      | productName | quantity |
+      | T-shirt     | 1        |
+
+  Scenario: Threshold discount applies when subtotal reaches 1000  # features/order.feature:19
+    Given the threshold discount promotion is configured           # features/steps/order_steps.py:55
+      | threshold | discount |
+      | 1000      | 100      |
+    When a customer places an order with                           # features/steps/order_steps.py:16
+      | productName | quantity | unitPrice |
+      | T-shirt     | 2        | 500       |
+      | 褲子          | 1        | 600       |
+    Then the order summary should be                               # features/steps/order_steps.py:28
+      | originalAmount | discount | totalAmount |
+      | 1600           | 100      | 1500        |
+    And the customer should receive                                # features/steps/order_steps.py:41
+      | productName | quantity |
+      | T-shirt     | 2        |
+      | 褲子          | 1        |
+
+  Scenario: Buy-one-get-one for cosmetics - multiple products   # features/order.feature:35
+    Given the buy one get one promotion for cosmetics is active # features/steps/order_steps.py:64
+    When a customer places an order with                        # features/steps/order_steps.py:16
+      | productName | category  | quantity | unitPrice |
+      | 口紅          | cosmetics | 1        | 300       |
+      | 粉底液         | cosmetics | 1        | 400       |
+    Then the order summary should be                            # features/steps/order_steps.py:28
+      | totalAmount |
+      | 700         |
+    And the customer should receive                             # features/steps/order_steps.py:41
+      | productName | quantity |
+      | 口紅          | 2        |
+      | 粉底液         | 2        |
+
+  Scenario: Buy-one-get-one for cosmetics - same product twice  # features/order.feature:49
+    Given the buy one get one promotion for cosmetics is active # features/steps/order_steps.py:64
+    When a customer places an order with                        # features/steps/order_steps.py:16
+      | productName | category  | quantity | unitPrice |
+      | 口紅          | cosmetics | 2        | 300       |
+    Then the order summary should be                            # features/steps/order_steps.py:28
+      | totalAmount |
+      | 600         |
+    And the customer should receive                             # features/steps/order_steps.py:41
+      | productName | quantity |
+      | 口紅          | 3        |
+
+  Scenario: Buy-one-get-one for cosmetics - mixed categories    # features/order.feature:61
+    Given the buy one get one promotion for cosmetics is active # features/steps/order_steps.py:64
+    When a customer places an order with                        # features/steps/order_steps.py:16
+      | productName | category  | quantity | unitPrice |
+      | 襪子          | apparel   | 1        | 100       |
+      | 口紅          | cosmetics | 1        | 300       |
+    Then the order summary should be                            # features/steps/order_steps.py:28
+      | totalAmount |
+      | 400         |
+    And the customer should receive                             # features/steps/order_steps.py:41
+      | productName | quantity |
+      | 襪子          | 1        |
+      | 口紅          | 2        |
+
+  Scenario: Multiple promotions stacked                       # features/order.feature:75
+    Given the threshold discount promotion is configured      # features/steps/order_steps.py:55
+      | threshold | discount |
+      | 1000      | 100      |
+    And the buy one get one promotion for cosmetics is active # features/steps/order_steps.py:64
+    When a customer places an order with                      # features/steps/order_steps.py:16
+      | productName | category  | quantity | unitPrice |
+      | T-shirt     | apparel   | 3        | 500       |
+      | 口紅          | cosmetics | 1        | 300       |
+    Then the order summary should be                          # features/steps/order_steps.py:28
+      | originalAmount | discount | totalAmount |
+      | 1800           | 100      | 1700        |
+    And the customer should receive                           # features/steps/order_steps.py:41
+      | productName | quantity |
+      | T-shirt     | 3        |
+      | 口紅          | 2        |
+
+  Scenario: Double 11 promotion applies for multiples of 10 of the same product  # features/order.feature:92
+    Given the double 11 promotion is active                                      # features/steps/order_steps.py:73
+    When a customer places an order with                                         # features/steps/order_steps.py:16
+      | productName | quantity | unitPrice |
+      | 襪子          | 12       | 100       |
+    Then the calculation method should be "10x100x80%+100x2=1000"                # features/steps/order_steps.py:79
+    Then the order summary should be                                             # features/steps/order_steps.py:28
+      | totalAmount |
+      | 1000        |
+    And the customer should receive                                              # features/steps/order_steps.py:41
+      | productName | quantity |
+      | 襪子          | 12       |
+
+  Scenario: Double 11 promotion applies for multiples of 10 of the same product, with remainder  # features/order.feature:105
+    Given the double 11 promotion is active                                                      # features/steps/order_steps.py:73
+    When a customer places an order with                                                         # features/steps/order_steps.py:16
+      | productName | quantity | unitPrice |
+      | 襪子          | 27       | 100       |
+    Then the calculation method should be "10x100x80%+10x100x80%+7x100=2300"                     # features/steps/order_steps.py:79
+    And the order summary should be                                                              # features/steps/order_steps.py:28
+      | totalAmount |
+      | 2300        |
+    And the customer should receive                                                              # features/steps/order_steps.py:41
+      | productName | quantity |
+      | 襪子          | 27       |
+
+  Scenario: Double 11 promotion does not apply for 10 different products  # features/order.feature:118
+    Given the double 11 promotion is active                               # features/steps/order_steps.py:73
+    When a customer places an order with                                  # features/steps/order_steps.py:16
+      | productName | quantity | unitPrice |
+      | A           | 1        | 100       |
+      | B           | 1        | 100       |
+      | C           | 1        | 100       |
+      | D           | 1        | 100       |
+      | E           | 1        | 100       |
+      | F           | 1        | 100       |
+      | G           | 1        | 100       |
+      | H           | 1        | 100       |
+      | I           | 1        | 100       |
+      | J           | 1        | 100       |
+    Then the calculation method should be "10 x 100 = 1000"               # features/steps/order_steps.py:79
+    And the order summary should be                                       # features/steps/order_steps.py:28
+      | totalAmount |
+      | 1000        |
+    And the customer should receive                                       # features/steps/order_steps.py:41
+      | productName | quantity |
+      | A           | 1        |
+      | B           | 1        |
+      | C           | 1        |
+      | D           | 1        |
+      | E           | 1        |
+      | F           | 1        |
+      | G           | 1        |
+      | H           | 1        |
+      | I           | 1        |
+      | J           | 1        |
+
+1 feature passed, 0 failed, 0 skipped
+9 scenarios passed, 0 failed, 0 skipped
+40 steps passed, 0 failed, 0 skipped, 0 undefined
+Took 0m0.007s
