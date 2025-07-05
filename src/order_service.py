@@ -1,11 +1,16 @@
 from src.entities import Order, OrderItem
+from src.enums import BogoType, ProductCategory, PromotionType
 
 
 class OrderService:
     def __init__(self, **kwargs):
-        self.threshold_discount_config = kwargs.get("threshold_discount")
-        self.bogo_type = kwargs.get("bogo_type")
-        self.double_11_promotion_active = kwargs.get("double_11_promotion", False)
+        self.threshold_discount_config = kwargs.get(
+            PromotionType.THRESHOLD_DISCOUNT.value
+        )
+        self.bogo_type = kwargs.get(PromotionType.BOGO_TYPE.value)
+        self.double_11_promotion_active = kwargs.get(
+            PromotionType.DOUBLE_11.value, False
+        )
 
     def _calculate_original_amount(self, items: list[OrderItem]) -> int:
         return sum(item.product.unit_price * item.quantity for item in items)
@@ -20,10 +25,10 @@ class OrderService:
         return current_discount, item
 
     def _apply_bogo_promotion(self, item: OrderItem) -> OrderItem:
-        if item.product.category == "cosmetics" and self.bogo_type:
-            if self.bogo_type == "buy_one_get_one":
+        if item.product.category == ProductCategory.COSMETICS and self.bogo_type:
+            if self.bogo_type == BogoType.BUY_ONE_GET_ONE:
                 return OrderItem(product=item.product, quantity=item.quantity * 2)
-            elif self.bogo_type == "buy_two_get_one":
+            elif self.bogo_type == BogoType.BUY_TWO_GET_ONE:
                 free_quantity = item.quantity // 2
                 return OrderItem(
                     product=item.product, quantity=item.quantity + free_quantity

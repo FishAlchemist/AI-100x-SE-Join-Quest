@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from src.enums import ProductCategory
 
 
 @dataclass
 class Product:
     name: str
     unit_price: int
-    category: str = ""
+    category: ProductCategory = ProductCategory.DEFAULT
 
 
 @dataclass
