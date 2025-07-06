@@ -1,5 +1,5 @@
 from src.entities import Order, OrderItem
-from src.enums import BogoType, ProductCategory, PromotionType
+from src.enums import ProductCategory, PromotionType
 
 
 class OrderService:
@@ -7,7 +7,7 @@ class OrderService:
         self.threshold_discount_config = kwargs.get(
             PromotionType.THRESHOLD_DISCOUNT.value
         )
-        self.bogo_type = kwargs.get(PromotionType.BOGO_TYPE.value)
+        self.bogo_cosmetics_promotion_active = kwargs.get(PromotionType.BOGO_COSMETICS.value)
         self.double_11_promotion_active = kwargs.get(
             PromotionType.DOUBLE_11.value, False
         )
@@ -25,7 +25,7 @@ class OrderService:
         return current_discount, item
 
     def _apply_bogo_promotion(self, item: OrderItem) -> OrderItem:
-        if item.product.category == ProductCategory.COSMETICS and self.bogo_type:
+        if item.product.category == ProductCategory.COSMETICS and self.bogo_cosmetics_promotion_active:
             return OrderItem(product=item.product, quantity=item.quantity + 1)
         return item
 

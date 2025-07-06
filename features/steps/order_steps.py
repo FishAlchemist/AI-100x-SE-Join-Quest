@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from src.entities import Product, OrderItem
 from src.order_service import OrderService
-from src.enums import BogoType, ProductCategory, PromotionType
+from src.enums import ProductCategory, PromotionType
 
 
 @given("no promotions are applied")
@@ -86,10 +86,7 @@ def step_given_threshold_discount(context):
 def step_given_bogo_cosmetics(context):
     if not hasattr(context, "promotions"):
         context.promotions = {}
-    bogo_type = BogoType.BUY_ONE_GET_ONE  # Default to buy one get one
-    if "same product twice" in context.scenario.name:
-        bogo_type = BogoType.BUY_TWO_GET_ONE
-    context.promotions[PromotionType.BOGO_TYPE.value] = bogo_type
+    context.promotions[PromotionType.BOGO_COSMETICS.value] = True
 
 
 @given("the double 11 promotion is active")
