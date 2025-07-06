@@ -17,12 +17,12 @@ class OrderService:
 
     def _apply_double_11_promotion(
         self, item: OrderItem, current_discount: int
-    ) -> tuple[int, OrderItem]:
+    ) -> int:
         if self.double_11_promotion_active and item.quantity >= 10:
             num_tens = item.quantity // 10
             discount_amount = num_tens * 10 * item.product.unit_price * 0.2
-            return current_discount + int(discount_amount), item
-        return current_discount, item
+            return current_discount + int(discount_amount)
+        return current_discount
 
     def _apply_bogo_promotion(self, item: OrderItem) -> OrderItem:
         if item.product.category == ProductCategory.COSMETICS and self.bogo_cosmetics_promotion_active:
@@ -41,19 +41,16 @@ class OrderService:
 
     def checkout(self, items: list[OrderItem]) -> Order:
         original_amount = self._calculate_original_amount(items)
+        original_amount = self._calculate_original_amount(items)
         total_discount = 0
         processed_items = []
 
         for item in items:
             # Apply Double 11 promotion
-            total_discount, updated_item = self._apply_double_11_promotion(
-                item, total_discount
-            )
+            total_discount = self._apply_double_11_promotion(item, total_discount)
 
             # Apply BOGO promotion
-            updated_item = self._apply_bogo_promotion(updated_item)
-
-            processed_items.append(updated_item)
+            processed_items.append(self._apply_bogo_promotion(item))
 
         # Apply Threshold discount
         total_discount = self._apply_threshold_discount(original_amount, total_discount)
