@@ -25,14 +25,8 @@ class OrderService:
         return current_discount, item
 
     def _apply_bogo_promotion(self, item: OrderItem) -> OrderItem:
-        # 修正：買一送一/買二送一計算方式
         if item.product.category == ProductCategory.COSMETICS and self.bogo_type:
-            if self.bogo_type == BogoType.BUY_ONE_GET_ONE:
-                free_quantity = item.quantity // 1  # 買 1 送 1
-                return OrderItem(product=item.product, quantity=item.quantity + free_quantity)
-            elif self.bogo_type == BogoType.BUY_TWO_GET_ONE:
-                free_quantity = item.quantity // 2  # 買 2 送 1
-                return OrderItem(product=item.product, quantity=item.quantity + free_quantity)
+            return OrderItem(product=item.product, quantity=item.quantity + 1)
         return item
 
     def _apply_threshold_discount(
