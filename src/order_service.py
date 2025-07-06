@@ -41,7 +41,6 @@ class OrderService:
 
     def checkout(self, items: list[OrderItem]) -> Order:
         original_amount = self._calculate_original_amount(items)
-        original_amount = self._calculate_original_amount(items)
         total_discount = 0
         processed_items = []
 
